@@ -336,7 +336,7 @@
             {% set format_hint = call('Toolbox::getDateFormat', ['php']) %}
         {% endif %}
         <script>
-            $(function() {
+            runWhenDomReady(function() {
                 $("#{{ options.id|e('css')|e('js') }}").flatpickr({
                     wrap: true,
                     altInput: true,

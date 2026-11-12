@@ -71,6 +71,22 @@ if ($.event.special.mousewheel !== undefined) {
 }
 
 /**
+ * Runs a function once the DOM is ready, and right away when it already is.
+ *
+ * jQuery always runs a ready callback in a later task: a content received from an AJAX request is then painted
+ * before its widgets are initialized, and moves when they are.
+ *
+ * @param {function} callback
+ */
+function runWhenDomReady(callback) {
+    if (document.readyState === 'loading') {
+        $(callback);
+    } else {
+        callback();
+    }
+}
+
+/**
  * modifier la propriete display d'un element
  *
  * @param objet
@@ -2222,5 +2238,6 @@ if (typeof module !== 'undefined' && module.exports) {
         getFlatPickerLocale,
         getAjaxCsrfToken,
         tableToDetails,
+        runWhenDomReady,
     };
 }

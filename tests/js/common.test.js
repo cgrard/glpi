@@ -248,6 +248,27 @@ describe('Common', () => {
         computed_style.mockRestore();
     });
 
+    it('runWhenDomReady runs the callback right away once the DOM is loaded', () => {
+        let called = false;
+        common.runWhenDomReady(() => {
+            called = true;
+        });
+        expect(called).toBe(true);
+    });
+
+    it('runWhenDomReady waits for the DOM while it is loading', async () => {
+        const ready_state = vi.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
+        let called = false;
+        common.runWhenDomReady(() => {
+            called = true;
+        });
+        expect(called).toBe(false);
+        ready_state.mockRestore();
+
+        // jQuery runs it as a ready callback
+        await vi.waitFor(() => expect(called).toBe(true));
+    });
+
     it('tableToDetails', () => {
         document.body.innerHTML = `
             <div id="sysinfo">
