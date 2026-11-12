@@ -4263,7 +4263,7 @@ JS;
             }
         }
 
-        $output .= Html::scriptBlock('$(function() {' . $js . '});');
+        $output .= Html::scriptBlock('runWhenDomReady(function() {' . $js . '});');
         $output .= self::select($name, $values, $options);
 
         return $output;
