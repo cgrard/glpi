@@ -34,13 +34,15 @@
 
 namespace tests\units\Glpi\RichText;
 
+use Document;
 use Glpi\Form\Tag\AnswerTagProvider;
 use Glpi\Form\Tag\Tag;
 use Glpi\RichText\RichText;
-use Glpi\Tests\GLPITestCase;
+use Glpi\Tests\DbTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Rule;
 
-class RichTextTest extends GLPITestCase
+class RichTextTest extends DbTestCase
 {
     public static function getSafeHtmlProvider(): iterable
     {
@@ -901,6 +903,44 @@ HTML,
             $expected_result,
             $result,
         );
+    }
+
+    public function testGetEnhancedHtmlReplacesImagesByGallery(): void
+    {
+        global $CFG_GLPI;
+
+        $document = $this->createImageDocument();
+        $src = $CFG_GLPI['root_doc'] . '/front/document.send.php?docid=' . $document->getID() . '&amp;itemtype=Ticket&amp;items_id=1';
+        $content = <<<HTML
+<p>Screenshot: <a href="{$src}" target="_blank"><img alt="screenshot" width="40" src="{$src}" /></a></p>
+HTML;
+
+        $result = RichText::getEnhancedHtml($content, ['images_gallery' => true]);
+
+        // The link to the image is replaced by a gallery item, and its URLs are not encoded twice
+        $this->assertStringNotContainsString('<img alt="screenshot"', $result);
+        $this->assertStringContainsString("<a href='{$src}' itemprop='contentUrl' data-index='0'>", $result);
+        $this->assertStringContainsString("<img src='{$src}' itemprop='thumbnail' loading='lazy'", $result);
+    }
+
+    /**
+     * Creates a document from the 67 x 71 image of the fixtures.
+     */
+    private function createImageDocument(): Document
+    {
+        $filename = 'foo.png';
+        copy(FIXTURE_DIR . '/uploads/foo.png', GLPI_TMP_DIR . '/' . $filename);
+
+        $document = new Document();
+        $document->add([
+            'filename'         => $filename,
+            '_filename'        => [$filename],
+            '_tag_filename'    => [Rule::getUuid()],
+            '_prefix_filename' => ['5e5e92ffd9bd91.11111111'],
+        ]);
+        $this->assertFalse($document->isNewItem());
+
+        return $document;
     }
 
 }

@@ -419,7 +419,7 @@ HTML;
 
         $image_matches = [];
         preg_match_all(
-            '/<a[^>]*>\s*<img[^>]*src=["\']([^"\']*document\.send\.php\?docid=([0-9]+)(?:&[^"\']+)?)["\'][^>]*>\s*<\/a>/',
+            '/<a[^>]*>\s*<img[^>]*src=["\']([^"\']*document\.send\.php\?docid(?:=|&#61;)([0-9]+)(?:&[^"\']+)?)["\'][^>]*>\s*<\/a>/',
             $content,
             $image_matches,
             PREG_SET_ORDER
@@ -430,7 +430,7 @@ HTML;
             $docid   = $image_match[2];
 
             // Special chars are encoded in `src` attribute. We decode them to be sure to work with "raw" data.
-            $docsrc  = htmlspecialchars_decode($image_match[1], ENT_QUOTES);
+            $docsrc  = html_entity_decode($image_match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
             $document = new Document();
             if ($document->getFromDB($docid)) {
