@@ -233,6 +233,21 @@ describe('Common', () => {
         expect(common.getFlatPickerLocale('de', 'DE')).toBe('de');
     });
 
+    it('jquery-mousewheel reads the line height once', () => {
+        const special = $.event.special.mousewheel;
+        expect(special).toBeDefined();
+        const line_height = special.getLineHeight(document.body);
+        expect(line_height).toBeGreaterThan(0);
+
+        // Each select2 binds a mousewheel handler: it must not read the style of the page again
+        const computed_style = vi.spyOn(window, 'getComputedStyle');
+        $('<ul></ul>').on('mousewheel', () => {});
+        $('<ul></ul>').on('mousewheel', () => {});
+        expect(computed_style.mock.calls.filter(([element]) => element === document.documentElement)).toHaveLength(0);
+        expect(special.getLineHeight(document.createElement('ul'))).toBe(line_height);
+        computed_style.mockRestore();
+    });
+
     it('tableToDetails', () => {
         document.body.innerHTML = `
             <div id="sysinfo">

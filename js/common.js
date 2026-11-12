@@ -58,6 +58,18 @@ var select2_configs = {};
 // Store fileupload configurations
 var fileupload_configs = {};
 
+// jquery-mousewheel, bundled with select2, reads the font size of the page each time a handler is bound, that is
+// once per select2, and each read forces a style recalculation of the whole document. Read it once.
+if ($.event.special.mousewheel !== undefined) {
+    let line_height = null;
+    $.event.special.mousewheel.getLineHeight = function () {
+        if (line_height === null) {
+            line_height = parseInt(getComputedStyle(document.documentElement).fontSize, 10) || 16;
+        }
+        return line_height;
+    };
+}
+
 /**
  * modifier la propriete display d'un element
  *
