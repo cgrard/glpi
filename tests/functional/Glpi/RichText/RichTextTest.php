@@ -923,6 +923,46 @@ HTML;
         $this->assertStringContainsString("<img src='{$src}' itemprop='thumbnail' loading='lazy'", $result);
     }
 
+    public static function galleryThumbnailSizeProvider(): iterable
+    {
+        yield 'no size in the content' => [
+            'size_attributes'     => '',
+            'expected_attributes' => "width='67' height='71'",
+        ];
+        yield 'width only' => [
+            'size_attributes'     => 'width="40"',
+            'expected_attributes' => "width='40' height='42'",
+        ];
+        yield 'height only' => [
+            'size_attributes'     => 'height="35"',
+            'expected_attributes' => "width='33' height='35'",
+        ];
+        yield 'width and height' => [
+            'size_attributes'     => 'width="40" height="20"',
+            'expected_attributes' => "width='40' height='20'",
+        ];
+    }
+
+    #[DataProvider('galleryThumbnailSizeProvider')]
+    public function testGalleryThumbnailHasBothDimensions(string $size_attributes, string $expected_attributes): void
+    {
+        global $CFG_GLPI;
+
+        $document = $this->createImageDocument();
+        $src = $CFG_GLPI['root_doc'] . '/front/document.send.php?docid=' . $document->getID();
+        $content = <<<HTML
+<p><a href="{$src}" target="_blank"><img alt="screenshot" {$size_attributes} src="{$src}" /></a></p>
+HTML;
+
+        $result = RichText::getEnhancedHtml($content, ['images_gallery' => true]);
+
+        // Without its two dimensions, the image has no reserved box and moves the content when it is loaded
+        $this->assertStringContainsString(
+            "<img src='{$src}' itemprop='thumbnail' loading='lazy' {$expected_attributes}>",
+            $result
+        );
+    }
+
     /**
      * Creates a document from the 67 x 71 image of the fixtures.
      */

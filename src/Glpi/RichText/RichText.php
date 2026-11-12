@@ -504,6 +504,11 @@ HTML;
             }
             $out .= "<figure itemprop='associatedMedia' itemscope itemtype='http://schema.org/ImageObject'>";
             $out .= "<a href='" . htmlescape($img['src']) . "' itemprop='contentUrl' data-index='0'>";
+            if (($img['w'] ?? 0) > 0 && ($img['h'] ?? 0) > 0) {
+                // Both dimensions are needed for the browser to reserve the box of the image before it is loaded.
+                $img['thumbnail_w'] ??= (int) round(($img['thumbnail_h'] ?? $img['h']) * $img['w'] / $img['h']);
+                $img['thumbnail_h'] ??= (int) round($img['thumbnail_w'] * $img['h'] / $img['w']);
+            }
             $width_attr = isset($img['thumbnail_w']) ? "width='" . ((int) $img['thumbnail_w']) . "'" : "";
             $height_attr = isset($img['thumbnail_h']) ? "height='" . ((int) $img['thumbnail_h']) . "'" : "";
             $out .= "<img src='" . htmlescape($img['thumbnail_src']) . "' itemprop='thumbnail' loading='lazy' {$width_attr} {$height_attr}>";
